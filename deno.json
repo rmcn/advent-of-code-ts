@@ -1,0 +1,12 @@
+{
+  "tasks": {
+    "dev": "deno run --env-file --allow-env=AOC_SESSION --allow-read=./ --deny-read=.env --allow-write=./inputs --allow-net=adventofcode.com:443 --watch main.ts"
+  },
+  "imports": {
+    "@mobily/ts-belt": "npm:@mobily/ts-belt@4.0.0-rc.5"
+  },
+  "fmt": {
+    "semiColons": false,
+    "singleQuote": true
+  }
+}
