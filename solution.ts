@@ -7,9 +7,8 @@ export async function loadSolution(
   year: number,
   day: number,
 ): Promise<Solution> {
-  const { default: solution } = await import(
-    `./${year}/${String(day).padStart(2, '0')}.ts`
-  )
+  const path = `./${year}/${String(day).padStart(2, '0')}.ts`
+  const { default: solution } = await import(path)
   return solution
 }
 
