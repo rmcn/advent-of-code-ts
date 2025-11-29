@@ -1,11 +1,11 @@
 import { Solution } from '../solution.ts'
-import { A, D } from '@mobily/ts-belt'
+import * as R from 'remeda'
 import { int, lines, sum } from '../utls.ts'
 
 export default <Solution> {
   one: (input: string) => {
-    const groups = A.groupBy(lines(input), (l) => l.split(' ')[0])
-    const sums = D.map(groups, (values) => sum(values.map((s) => int(s))))
+    const groups = R.groupBy(lines(input), (l) => l.split(' ')[0])
+    const sums = R.mapValues(groups, (values) => sum(values.map((s) => int(s))))
     return sums.forward * (sums.down - sums.up)
   },
 

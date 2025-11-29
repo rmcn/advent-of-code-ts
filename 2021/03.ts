@@ -1,5 +1,5 @@
 import { Solution } from '../solution.ts'
-import { A, D } from '@mobily/ts-belt'
+import * as R from 'remeda'
 import { int, lines, sum } from '../utls.ts'
 
 export default <Solution> {
@@ -31,7 +31,7 @@ function filterEach(nums: string[], a: string, b: string) {
   const n = nums[0].length
   let ox = nums.slice()
   for (let i = 0; i < n; i++) {
-    const counts = D.map(A.groupBy(ox, (l) => l[i]), (g) => g.length)
+    const counts = R.mapValues(R.groupBy(ox, (l) => l[i]), (g) => g.length)
     const filter = (counts['1'] >= counts['0']) ? a : b
     ox = ox.filter((n) => n[i] == filter)
     if (ox.length == 1) return ox[0]

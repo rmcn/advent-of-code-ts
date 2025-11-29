@@ -1,12 +1,12 @@
 import { Solution } from '../solution.ts'
 import { lines } from '../utls.ts'
-import { A } from '@mobily/ts-belt'
+import * as R from 'remeda'
 
 export default <Solution> {
   one: (input: string) => {
     const ints = lines(input).map((s) => Number(s))
 
-    const pairs = A.zip(ints, ints.slice(1))
+    const pairs = R.zip(ints, ints.slice(1))
 
     return pairs.filter(([a, b]) => b > a).length
   },
@@ -14,13 +14,13 @@ export default <Solution> {
   two: (input: string) => {
     const ints = lines(input).map((s) => Number(s))
 
-    const trips = A.zipWith(
-      A.zipWith(ints, ints.slice(1), (a, b) => a + b),
+    const trips = R.zipWith(
+      R.zipWith(ints, ints.slice(1), (a, b) => a + b),
       ints.slice(2),
       (ab, c) => ab + c,
     )
 
-    const pairs = A.zip(trips, trips.slice(1))
+    const pairs = R.zip(trips, trips.slice(1))
 
     return pairs.filter(([a, b]) => b > a).length
   },

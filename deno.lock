@@ -1,16 +1,22 @@
 {
   "version": "5",
   "specifiers": {
-    "npm:@mobily/ts-belt@4.0.0-rc.5": "4.0.0-rc.5"
+    "npm:remeda@2.32.0": "2.32.0"
   },
   "npm": {
-    "@mobily/ts-belt@4.0.0-rc.5": {
-      "integrity": "sha512-HLWJ8yKrfwdMzCvckRunrAL8Z+K5q31FdY6JzhkBp8o6uQsVuzf26KFyno1s6n6GB78OJEsjs57SaDk9plsJhA=="
+    "remeda@2.32.0": {
+      "integrity": "sha512-BZx9DsT4FAgXDTOdgJIc5eY6ECIXMwtlSPQoPglF20ycSWigttDDe88AozEsPPT4OWk5NujroGSBC1phw5uU+w==",
+      "dependencies": [
+        "type-fest"
+      ]
+    },
+    "type-fest@4.41.0": {
+      "integrity": "sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA=="
     }
   },
   "workspace": {
     "dependencies": [
-      "npm:@mobily/ts-belt@4.0.0-rc.5"
+      "npm:remeda@2.32.0"
     ]
   }
 }

@@ -1,4 +1,4 @@
-import { A } from '@mobily/ts-belt'
+import * as R from 'remeda'
 
 export function lines(input: string): string[] {
   const all = input.split('\n')
@@ -10,5 +10,5 @@ export function int(s: string): number {
 }
 
 export function sum(nums: number[]): number {
-  return A.reduce(nums, 0, (a, b) => a + b)
+  return R.reduce(nums, (a, b) => a + b, 0)
 }
