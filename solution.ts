@@ -39,3 +39,39 @@ export async function readInput(year: number, day: number): Promise<string> {
     return input
   }
 }
+
+export async function readExample(year: number, day: number): Promise<string> {
+  const path = `./inputs/${year}/${String(day).padStart(2, '0')}-example.txt`
+
+  try {
+    await Deno.lstat(path)
+    console.log(`Reading ${path}`)
+    return await Deno.readTextFile(path)
+  } catch (err) {
+    if (!(err instanceof Deno.errors.NotFound)) {
+      throw err
+    }
+
+    const response = await fetch(
+      `https://adventofcode.com/${year}/day/${day}`,
+      {
+        headers: { 'Cookie': `session=${Deno.env.get('AOC_SESSION')}` },
+      },
+    )
+
+    const lines = (await response.text()).split('\n')
+    const start = lines.findIndex((l) => l.startsWith('<pre><code>'))
+    const end = lines.findIndex((l) => l.startsWith('</code></pre>'))
+
+    const exampleLines = (start != -1 && end != -1)
+      ? lines.slice(start, end)
+      : ['none :-(']
+    exampleLines[0] = exampleLines[0].substring('<pre><code>'.length)
+    const example = exampleLines.join('\n')
+
+    await Deno.writeTextFile(path, example)
+
+    console.log(`Fetched ${path}`)
+    return example
+  }
+}
