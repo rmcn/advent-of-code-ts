@@ -1,10 +1,10 @@
 import { Solution } from '../solution.ts'
 import * as R from 'remeda'
-import { int, lines, sum } from '../utls.ts'
+import * as U from '../utls.ts'
 
 export default <Solution> {
   one: (input: string) => {
-    const nums = lines(input)
+    const nums = U.lines(input)
     const n = nums[0].length
     let gamma = ''
     let epsilon = ''
@@ -20,7 +20,7 @@ export default <Solution> {
   },
 
   two: (input: string) => {
-    const nums = lines(input)
+    const nums = U.lines(input)
     const oxygen = filterEach(nums, '1', '0')
     const co2 = filterEach(nums, '0', '1')
     return parseInt(oxygen, 2) * parseInt(co2, 2)

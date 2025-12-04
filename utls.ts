@@ -17,10 +17,6 @@ export function posInts(s: string): number[] {
   return s.match(/[0-9]+/g)?.map((n) => Number(n)) ?? []
 }
 
-export function sum(nums: number[]): number {
-  return R.reduce(nums, (a, b) => a + b, 0)
-}
-
 export function segmentOn<T>(
   data: T[],
   predicate: (item: T) => boolean,

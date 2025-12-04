@@ -1,10 +1,10 @@
 import { Solution } from '../solution.ts'
-import { lines } from '../utls.ts'
 import * as R from 'remeda'
+import * as U from '../utls.ts'
 
 export default <Solution> {
   one: (input: string) => {
-    const ints = lines(input).map((s) => Number(s))
+    const ints = U.lines(input).map((s) => Number(s))
 
     const pairs = R.zip(ints, ints.slice(1))
 
@@ -12,7 +12,7 @@ export default <Solution> {
   },
 
   two: (input: string) => {
-    const ints = lines(input).map((s) => Number(s))
+    const ints = U.lines(input).map((s) => Number(s))
 
     const trips = R.zipWith(
       R.zipWith(ints, ints.slice(1), (a, b) => a + b),
