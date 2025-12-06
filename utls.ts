@@ -41,3 +41,8 @@ export function transpose<T>(data: T[][]): T[][] {
   }
   return result
 }
+
+export function transposeStrings(data: string[]): string[] {
+  const charsList = data.map((s) => s.split(''))
+  return transpose(charsList).map((chars) => chars.join(''))
+}
