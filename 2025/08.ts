@@ -65,5 +65,5 @@ function pairsByDistance(sockets: Socket[]) {
     }
   }
 
-  return R.sortBy(pairs, R.prop('dSquared'))
+  return pairs.sort((a, b) => a.dSquared - b.dSquared)
 }
