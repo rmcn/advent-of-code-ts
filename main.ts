@@ -10,6 +10,6 @@ const example = await readExample(year, day)
 const start = performance.now()
 
 console.log('One:', solution.one(input))
-console.log('Two:', solution.two(example))
+console.log('Two:', solution.two(input))
 
 console.log((performance.now() - start).toFixed(2), 'ms')
