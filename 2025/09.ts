@@ -8,10 +8,8 @@ export default <Solution> {
       x: p[0],
       y: p[1],
     }))
-    const rectsByDecreasingArea = calcRects(points).sort((a, b) =>
-      b.area - a.area
-    )
-    return rectsByDecreasingArea[0].area
+    const rectsByAreaDesc = calcRects(points).sort((a, b) => b.area - a.area)
+    return rectsByAreaDesc[0].area
   },
 
   two: (input: string) => {
@@ -19,9 +17,8 @@ export default <Solution> {
       x: p[0],
       y: p[1],
     }))
-    const rectsByDecreasingArea = calcRects(points).sort((a, b) =>
-      b.area - a.area
-    )
+
+    const rectsByAreaDesc = calcRects(points).sort((a, b) => b.area - a.area)
 
     const edges: [P2, P2][] = R.zip(points, points.slice(1))
     edges.push([
@@ -29,7 +26,7 @@ export default <Solution> {
       points[0],
     ])
 
-    for (const rect of rectsByDecreasingArea) {
+    for (const rect of rectsByAreaDesc) {
       if (isRectInsideShape(points, edges, rect)) {
         return rect.area
       }
@@ -84,13 +81,6 @@ function isRectInsideShape(
   // check all rect points inside big-shape
   for (const rectPoint of rectPoints) {
     if (!isPointInside(rectPoint, edges)) {
-      return false
-    }
-  }
-
-  // check all big-shape points outside rect
-  for (const bigPoint of points) {
-    if (isPointInside(bigPoint, rectEdges)) {
       return false
     }
   }
