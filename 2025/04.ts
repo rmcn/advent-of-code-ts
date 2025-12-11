@@ -1,6 +1,4 @@
 import { Solution } from '../solution.ts'
-import * as R from 'remeda'
-import * as U from '../utls.ts'
 import { Cell, Grid } from '../grid.ts'
 
 export default <Solution> {

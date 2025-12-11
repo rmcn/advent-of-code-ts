@@ -37,11 +37,12 @@ export default <Solution> {
     const fftToOut = G.countPaths('fft', 'out', g, topoOrder)
     const dacToOut = G.countPaths('dac', 'out', g, topoOrder)
 
-    const dacFirst = svrToDac * dacToFft * fftToOut
-    const fftFirst = svrToFft * fftToDac * dacToOut
-
-    console.log(dacFirst, fftFirst)
-
-    return dacFirst == 0 ? fftFirst : dacFirst
+    // It's a acyclic graph, so either dac will be first or ftt,
+    // and so either fftToDac or dacToFft will be 0, calculate
+    // full-path count for both options and use the one that
+    // isn't zero!
+    const visitDacFirst = svrToDac * dacToFft * fftToOut
+    const visitFftFirst = svrToFft * fftToDac * dacToOut
+    return visitDacFirst == 0 ? visitFftFirst : visitDacFirst
   },
 }

@@ -1,5 +1,4 @@
 import { Solution } from '../solution.ts'
-import * as R from 'remeda'
 import * as U from '../utls.ts'
 
 export default <Solution> {

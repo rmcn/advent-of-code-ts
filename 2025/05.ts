@@ -1,7 +1,6 @@
 import { Solution } from '../solution.ts'
 import * as R from 'remeda'
 import * as U from '../utls.ts'
-import { Cell, Grid } from '../grid.ts'
 
 function inRange(n: number, r: { s: number; e: number }) {
   return n >= r.s && n <= r.e
