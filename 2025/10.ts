@@ -71,177 +71,210 @@ function toggleLights(state: number[], indexes: number[]): number[] {
   return result
 }
 
-function applyCombo(
-  state: number[],
-  combo: number[],
-  buttons: { i: number; b: number[] }[],
-) {
-  const result = state.slice()
-
-  for (let i = 0; i < combo.length; i++) {
-    const presses = combo[i]
-    const button = buttons[i]
-
-    for (const l of button.b) {
-      result[l] = result[l] + presses
-    }
-  }
-  return result
-}
-
-function countButtonsContaining(buttons: number[][], i: number): number {
-  return buttons.filter((b) => b.includes(i)).length
-}
-
 function minPressesForJoltages(m: Machine): number {
-  console.log('Solving for ', m.joltages)
-  const initialState = R.range(0, m.joltages.length).map((_) => 0)
+  const matrix: number[][] = []
 
-  const ordered = m.joltages.map((j, i) => ({ j, i })).sort((a, b) => a.j - b.j)
+  m.joltages.forEach((j, ji) => {
+    const row: number[] = []
+    m.buttons.forEach((jList) => {
+      row.push(jList.includes(ji) ? 1 : 0)
+    })
+    row.push(j)
+    matrix.push(row)
+  })
 
-  let states: { s: number[]; presses: number }[] = [{
-    s: initialState,
-    presses: 0,
-  }]
+  const maxPresses = R.sum(m.joltages)
 
-  let allButtons = m.buttons.slice()
-  //console.log('All buttons', allButtons)
+  //console.log(matrix.map((r) => r.join(', ')))
 
-  for (const targetJ of ordered) {
-    // buttons that increment target joltage's index
-    const buttons = allButtons.map((b, i) => ({ b, i })).filter((b) =>
-      b.b.includes(targetJ.i)
-    ) /*
-    console.log(
-      'Targeting joltage',
-      targetJ.j,
-      'index',
-      targetJ.i,
-      'with buttons',
-      buttons,
-    )*/
+  const rowEchForm = gaussianElimination(matrix)
+  //console.log(rowEchForm.map((r) => r.join(', ')))
 
-    if (buttons.length == 0) {
+  integerize(rowEchForm)
+  //console.log(rowEchForm.map((r) => r.join(', ')))
+
+  const sols = backSub(rowEchForm, maxPresses)
+  const validSols = sols.filter((s) => testSol(m, s))
+
+  //console.log('Solutions', sols)
+  validSols.sort((a, b) => R.sum(a) - R.sum(b))
+  const counts = validSols.map((s) => R.sum(s))
+  //console.log('Counts', counts)
+
+  const minCount = Math.min(...counts)
+  const maxCount = Math.max(...counts)
+
+  console.log(minCount, testSol(m, validSols[0]) ? '' : 'INVALID')
+  return minCount
+}
+
+/** Transform an augmented matrix into row echelon form using gaussian elimination */
+function gaussianElimination(augmentedMatrix: number[][]): number[][] {
+  // Deep clone
+  const m = augmentedMatrix.slice()
+  m.forEach((row, i) => m[i] = row.slice())
+
+  //console.log('Start', m.map((r) => r.join(', ')))
+
+  let pr = 0
+  let pc = 0
+  // for each column (except augment col at end), and handling shortage of rows
+  while (pc < m[0].length - 1 && pr < m.length) {
+    const bestRow = largestNonZero(m, pr, pc)
+
+    //console.log(`pivot r`, pr, 'c', pc, 'best row', bestRow)
+
+    if (bestRow == -1) {
+      pc += 1
       continue
     }
-    //console.log(combos.length)
 
-    // apply each combo to each state
-    const newStates: { s: number[]; presses: number }[] = []
-    for (const state of states) {
-      const pressesRequired = targetJ.j - state.s[targetJ.i]
-      const combos = calcCombos(buttons.length, pressesRequired)
-      for (const combo of combos) {
-        const newState = applyCombo(state.s, combo, buttons)
-        if (isTarget(m.joltages, newState)) {
-          return state.presses + pressesRequired
-        }
-        if (inRange(m.joltages, newState)) {
-          newStates.push({
-            s: newState,
-            presses: state.presses + pressesRequired,
-          })
-        }
+    // swap best row into pivot row
+    if (pr != bestRow) {
+      ;[m[pr], m[bestRow]] = [m[bestRow], m[pr]]
+    }
+
+    //console.log('Swapped', m.map((r) => r.join(', ')))
+
+    // for each row below the pivot subtract multiple of pivot to zero col p
+    for (let r = pr + 1; r < m.length; r++) {
+      const f = m[r][pc] / m[pr][pc]
+      for (let c = pc; c < m[0].length; c++) {
+        m[r][c] = m[r][c] - m[pr][c] * f
       }
     }
 
-    states = newStates
-
-    allButtons = allButtons.filter((_, i) => !buttons.find((b) => b.i == i))
-    //console.log('remaining', allButtons)
+    pc += 1
+    pr += 1
+    //console.log('Applied', m.map((r) => r.join(', ')))
   }
 
-  const successPresses = states.filter((s) => isTarget(m.joltages, s.s)).map(
-    (s) => s.presses,
-  )
-  return Math.min(...successPresses)
+  return m
 }
 
-function inRange(joltages: number[], state: number[]): boolean {
-  for (let i = 0; i < joltages.length; i++) {
-    if (state[i] > joltages[i]) {
+function largestNonZero(m: number[][], pr: number, pc: number) {
+  let maxRow = -1
+  let maxValue = 0
+  for (let r = pr; r < m.length; r++) {
+    if (m[r][pc] != 0 && Math.abs(m[r][pc]) > maxValue) {
+      maxRow = r
+      maxValue = Math.abs(m[r][pc])
+    }
+  }
+
+  return maxRow
+}
+
+function backSub(m: number[][], maxPresses: number): number[][] {
+  const sols: number[][] = []
+  const sol: number[] = Array(m[0].length - 1)
+  backSubRow(m, m.length - 1, sol, 0, sols, maxPresses)
+  return sols
+}
+
+function backSubRow(
+  m: number[][],
+  r: number,
+  sol: number[],
+  solCount: number,
+  sols: number[][],
+  maxPresses: number,
+) {
+  if (r < 0) {
+    sols.push(sol)
+    return
+  }
+
+  const row = m[r]
+
+  // Skip zero columns
+  let c = 0
+  for (c = 0; c < row.length - 1 - solCount; c++) {
+    if (row[c] != 0) {
+      break
+    }
+  }
+
+  const unknownCount = row.length - 1 - solCount - c
+
+  //console.log('Unknown', unknownCount, c, sol)
+
+  if (unknownCount == 1) {
+    const knownTotal: number = sumKnown(row, sol, solCount)
+    const solVal = round((row.at(-1)! - knownTotal) / row[c], 5)
+
+    if (solVal < 0) {
+      return
+    }
+
+    if (!isInteger(solVal)) {
+      return
+    }
+
+    sol[sol.length - 1 - solCount] = solVal
+    backSubRow(m, r - 1, sol, solCount + 1, sols, maxPresses)
+  } else if (unknownCount == 0) {
+    // nowt to do
+    backSubRow(m, r - 1, sol, solCount, sols, maxPresses)
+  } else if (unknownCount >= 2) {
+    // one free var, try several values from 0 onwards, stop when too big?
+    for (let solVal = 0; solVal <= maxPresses; solVal++) {
+      sol[sol.length - 1 - solCount] = solVal
+      backSubRow(m, r, sol.slice(), solCount + 1, sols, maxPresses)
+    }
+  } else {
+    throw new Error(`Unsuppored ${unknownCount}`)
+  }
+}
+
+function sumKnown(row: number[], sol: number[], solCount: number): number {
+  let t = 0
+  for (let i = sol.length - solCount; i < sol.length; i++) {
+    t += row[i] * sol[i]
+  }
+  return t
+}
+
+function isInteger(solVal: number): boolean {
+  return Number.isInteger(round(solVal, 5))
+}
+
+function round(n: number, decimalPlaces: number) {
+  const factor = Math.pow(10, decimalPlaces)
+  return Math.round((n + Number.EPSILON) * factor) / factor
+}
+
+function integerize(m: number[][]) {
+  for (let r = 0; r < m.length; r++) {
+    for (let c = 0; c < m[r].length; c++) {
+      m[r][c] = round(120.0 * m[r][c], 5)
+    }
+  }
+}
+
+function testSol(m: Machine, presses: number[]): boolean {
+  const actualJs: number[] = Array(m.joltages.length).fill(0)
+
+  for (let i = 0; i < m.buttons.length; i++) {
+    for (let j = 0; j < m.buttons[i].length; j++) {
+      actualJs[m.buttons[i][j]] += presses[i]
+    }
+  }
+
+  //console.log(actualJs, m.joltages)
+
+  return arraysEqual(actualJs, m.joltages)
+}
+
+function arraysEqual<T>(a: T[], b: T[]): boolean {
+  if (a.length != b.length) {
+    return false
+  }
+
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) {
       return false
     }
   }
   return true
-}
-
-function isTarget(joltages: number[], state: number[]): boolean {
-  for (let i = 0; i < joltages.length; i++) {
-    if (state[i] != joltages[i]) {
-      return false
-    }
-  }
-  return true
-}
-
-function calcCombos(c: number, n: number): number[][] {
-  switch (c) {
-    case 1:
-      return [[n]]
-    case 2:
-      return combos2(n)
-    case 3:
-      return combos3(n)
-    case 4:
-      return combos4(n)
-    case 5:
-      return combos5(n)
-    default:
-      throw new Error(`Can't combo ${c}`)
-  }
-}
-
-function combos2(n: number): number[][] {
-  const results: number[][] = []
-  for (let i = 0; i <= n; i++) {
-    const remainder = n - i
-    results.push([i, remainder])
-  }
-  return results
-}
-
-function combos3(n: number): number[][] {
-  const results: number[][] = []
-  for (let i = 0; i <= n; i++) {
-    for (let j = 0; j <= n; j++) {
-      const remainder = n - i - j
-      if (remainder >= 0) {
-        results.push([i, j, remainder])
-      }
-    }
-  }
-  return results
-}
-
-function combos4(n: number): number[][] {
-  const results: number[][] = []
-  for (let i = 0; i <= n; i++) {
-    for (let j = 0; j <= n; j++) {
-      for (let k = 0; k <= n; k++) {
-        const remainder = n - i - j - k
-        if (remainder >= 0) {
-          results.push([i, j, k, remainder])
-        }
-      }
-    }
-  }
-  return results
-}
-
-function combos5(n: number): number[][] {
-  const results: number[][] = []
-  for (let i = 0; i <= n; i++) {
-    for (let j = 0; j <= n; j++) {
-      for (let k = 0; k <= n; k++) {
-        for (let l = 0; l <= n; l++) {
-          const remainder = n - i - j - k - l
-          if (remainder >= 0) {
-            results.push([i, j, k, l, remainder])
-          }
-        }
-      }
-    }
-  }
-  return results
 }
