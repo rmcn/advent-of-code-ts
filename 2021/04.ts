@@ -3,51 +3,26 @@ import * as R from 'remeda'
 import * as U from '../utls.ts'
 
 export default <Solution> {
-  one: (input: string) => {
-    const { calls, boards } = parse(input)
-    const callsInv = R.fromEntries(calls.map((v, i) => [v, i]))
+  one: (input: string) => solve(input, 'min'),
+  two: (input: string) => solve(input, 'max'),
+}
 
-    let winCallIndex = calls.length
-    let winBoardIndex = -1
-    for (let i = 0; i < boards.length; i++) {
-      const callIndex = firstLineCallIndex(boards[i], callsInv)
+function solve(input: string, comp: 'min' | 'max') {
+  const { calls, boards } = parse(input)
+  const callsInv = R.fromEntries(calls.map((v, i) => [v, i]))
 
-      if (callIndex < winCallIndex) {
-        winCallIndex = callIndex
-        winBoardIndex = i
-      }
-    }
+  const firstLineIndexes = boards.map((b) => firstLineCallIndex(b, callsInv))
+  const bestBoardIndex = comp == 'min'
+    ? U.minIndex(firstLineIndexes)
+    : U.maxIndex(firstLineIndexes)
+  const bestCallIndex = firstLineIndexes[bestBoardIndex]
 
-    const unmarked = R.flatMap(boards[winBoardIndex], (b) => b).filter((v) =>
-      callsInv[v] > winCallIndex
-    )
-    const unmarkedSum = R.sum(unmarked)
+  const unmarked = boards[bestBoardIndex].flat().filter((v) =>
+    callsInv[v] > bestCallIndex
+  )
+  const unmarkedSum = R.sum(unmarked)
 
-    return unmarkedSum * calls[winCallIndex]
-  },
-
-  two: (input: string) => {
-    const { calls, boards } = parse(input)
-    const callsInv = R.fromEntries(calls.map((v, i) => [v, i]))
-
-    let winCallIndex = -1
-    let winBoardIndex = -1
-    for (let i = 0; i < boards.length; i++) {
-      const callIndex = firstLineCallIndex(boards[i], callsInv)
-
-      if (callIndex > winCallIndex) {
-        winCallIndex = callIndex
-        winBoardIndex = i
-      }
-    }
-
-    const unmarked = R.flatMap(boards[winBoardIndex], (b) => b).filter((v) =>
-      callsInv[v] > winCallIndex
-    )
-    const unmarkedSum = R.sum(unmarked)
-
-    return unmarkedSum * calls[winCallIndex]
-  },
+  return unmarkedSum * calls[bestCallIndex]
 }
 
 function parse(input: string) {
