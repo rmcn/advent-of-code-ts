@@ -101,8 +101,8 @@ function minPressesForJoltages(m: Machine): number {
   const counts = validSols.map((s) => R.sum(s))
   //console.log('Counts', counts)
 
-  const minCount = Math.min(...counts)
-  const maxCount = Math.max(...counts)
+  const minCount = U.min(counts)
+  const maxCount = U.max(counts)
 
   console.log(minCount, testSol(m, validSols[0]) ? '' : 'INVALID')
   return minCount

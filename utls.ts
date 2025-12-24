@@ -47,6 +47,14 @@ export function transposeStrings(data: string[]): string[] {
   return transpose(charsList).map((chars) => chars.join(''))
 }
 
+export function min(a: number[]): number {
+  return Math.min(...a)
+}
+
+export function max(a: number[]): number {
+  return Math.max(...a)
+}
+
 export function minIndex(a: number[]): number {
   if (a.length == 0) return -1
   let min = a[0]

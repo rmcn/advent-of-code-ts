@@ -43,9 +43,6 @@ function firstLineCallIndex(
   callsInv: Record<number, number>,
 ): number {
   const lines = board.concat(U.transpose(board))
-  const linesLastCallIndex = lines.map((l) =>
-    Math.max(...l.map((v) => callsInv[v]))
-  )
-  const result = Math.min(...linesLastCallIndex)
-  return result
+  const maxCallIndexes = lines.map((l) => U.max(l.map((v) => callsInv[v])))
+  return U.min(maxCallIndexes)
 }
