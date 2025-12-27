@@ -4,15 +4,15 @@ import * as U from '../utls.ts'
 
 export default <Solution> {
   one: (input: string) => {
-    return simulate(input, 80).toString()
+    return simulate(input, 80)
   },
 
   two: (input: string) => {
-    return simulate(input, 256).toString()
+    return simulate(input, 256)
   },
 }
 
-function simulate(input: string, days: number): bigint {
+function simulate(input: string, days: number): bigint | 0 {
   const timers = U.ints(input)
   let timerCounts = new Array<bigint>(9).fill(0n)
   for (const fish of timers) {
@@ -28,6 +28,5 @@ function simulate(input: string, days: number): bigint {
     nextTimerCounts[6] += timerCounts[0]
     timerCounts = nextTimerCounts
   }
-  const total = R.sum(timerCounts)
-  return total == 0 ? 0n : total
+  return R.sum(timerCounts)
 }

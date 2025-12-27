@@ -1,6 +1,6 @@
 export interface Solution {
-  one: (input: string) => string | number
-  two: (input: string) => string | number
+  one: (input: string) => string | number | bigint
+  two: (input: string) => string | number | bigint
 }
 
 export async function loadSolution(
