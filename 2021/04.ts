@@ -8,7 +8,12 @@ export default <Solution> {
 }
 
 function solve(input: string, comp: 'min' | 'max') {
-  const { calls, boards } = parse(input)
+  const lines = U.lines(input)
+  const chunks = U.segmentOn(lines, (l) => l.length == 0)
+
+  const calls = U.ints(chunks[0][0])
+  const boards = chunks.slice(1).map((c) => c.map((row) => U.ints(row)))
+
   const callsInv = R.fromEntries(calls.map((v, i) => [v, i]))
 
   const firstLineIndexes = boards.map((b) => firstLineCallIndex(b, callsInv))
@@ -17,25 +22,11 @@ function solve(input: string, comp: 'min' | 'max') {
     : U.maxIndex(firstLineIndexes)
   const bestCallIndex = firstLineIndexes[bestBoardIndex]
 
-  const unmarked = boards[bestBoardIndex].flat().filter((v) =>
-    callsInv[v] > bestCallIndex
-  )
+  const bestBoardNumbers = boards[bestBoardIndex].flat()
+  const unmarked = bestBoardNumbers.filter((v) => callsInv[v] > bestCallIndex)
   const unmarkedSum = R.sum(unmarked)
 
   return unmarkedSum * calls[bestCallIndex]
-}
-
-function parse(input: string) {
-  const lines = U.lines(input)
-
-  const chunks = U.segmentOn(lines, (l) => l.length == 0)
-  const calls = U.ints(chunks[0][0])
-  if (calls.length != R.unique(calls).length) {
-    throw new Error('Duplicate calls')
-  }
-
-  const boards = chunks.slice(1).map((c) => c.map((row) => U.ints(row)))
-  return { calls, boards }
 }
 
 function firstLineCallIndex(
