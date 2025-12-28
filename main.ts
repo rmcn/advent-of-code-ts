@@ -1,7 +1,7 @@
 import { loadSolution, readExample, readInput } from './solution.ts'
 
 const year = 2021
-const day = 7
+const day = 8
 
 const solution = await loadSolution(year, day)
 const input = await readInput(year, day)
